@@ -1,0 +1,33 @@
+from scapy.all import sniff
+from scapy.layers.inet import IP, TCP, UDP
+
+def packet_callback(packet):
+    if IP in packet:
+        ip_src = packet[IP].src
+        ip_dst = packet[IP].dst
+        protocol = packet[IP].proto
+
+        if TCP in packet:
+            protocol_name = "TCP"
+            sport = packet[TCP].sport
+            dport = packet[TCP].dport
+            payload = packet[TCP].payload
+        elif UDP in packet:
+            protocol_name = "UDP"
+            sport = packet[UDP].sport
+            dport = packet[UDP].dport
+            payload = packet[UDP].payload
+        else:
+            protocol_name = "Other"
+            sport = dport = "N/A"
+            payload = "N/A"
+        
+        print(f"Source IP: {ip_src} -> Destination IP: {ip_dst}")
+        print(f"Protocol: {protocol_name} (Protocol Number: {protocol})")
+        print(f"Source Port: {sport} -> Destination Port: {dport}")
+        print(f"Payload: {payload}")
+        print("="*50)
+
+# Start sniffing the network
+print("Starting packet sniffer...")
+sniff(filter="ip", prn=packet_callback, store=0)

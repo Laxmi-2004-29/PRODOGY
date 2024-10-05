@@ -1,0 +1,23 @@
+def caesar_cipher(text,shift,direction):
+    result =""
+    if  direction == "decrypt":
+        shift = -shift
+        for char in text:
+            if char.isupper():
+                new_position =(ord(char) - 65 + shift) % 26 
+            result +=chr(new_position + 65)
+    elif char.islower():
+      new_position = (ord(char) - 97 + shift) % 26
+      result +=chr(new_position +97)
+    else:
+         result+=char
+
+         return result
+def main() :
+    message = input("enter your message: ")
+    direction = input( "Type'encrypt' to encrypt or 'decrypt' to decrypt: ").lower()
+    shift = int(input("enter the shift value: "))
+    result = caesar_cipher(message, shift, direction);
+    print(f"the{direction}ed message is: {result}")
+    if __name__ == "__main__":
+        main()

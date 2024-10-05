@@ -1,0 +1,67 @@
+from PIL import Image
+import numpy as np
+import random
+
+def load_image(image_path):
+    """Load an image from a file path."""
+    return Image.open(image_path)
+
+def save_image(image_array, output_path):
+    """Save an image array to a file."""
+    img = Image.fromarray(image_array)
+    img.save(output_path)
+
+def pixel_shuffling(image_array, key):
+    """Shuffle pixels in the image array based on the provided key."""
+    height, width, channels = image_array.shape
+    pixels = image_array.reshape(-1, channels)
+
+    random.seed(key)  # Set seed for reproducibility
+    random.shuffle(pixels)
+
+    return pixels.reshape((height, width, channels))
+
+def xor_with_key(image_array, key):
+    """XOR each pixel with the key."""
+    key_array = np.array([key] * image_array.shape[0]).reshape(-1, 1, 1)
+    return image_array ^ key_array
+
+def encrypt(image_path, output_path, key):
+    """Encrypt the image."""
+    image = load_image(image_path)
+    image_array = np.array(image)
+
+    # Shuffle pixels
+    shuffled_array = pixel_shuffling(image_array, key)
+
+    # XOR with key
+    encrypted_array = xor_with_key(shuffled_array, key)
+
+    save_image(encrypted_array, output_path)
+
+def decrypt(encrypted_path, output_path, key):
+    """Decrypt the image."""
+    encrypted_image = load_image(encrypted_path)
+    encrypted_array = np.array(encrypted_image)
+
+    # XOR with key
+    unshuffled_array = xor_with_key(encrypted_array, key)
+
+    # Reverse pixel shuffling
+    height, width, channels = unshuffled_array.shape
+    pixels = unshuffled_array.reshape(-1, channels)
+    indices = np.arange(len(pixels))
+    random.seed(key)
+    shuffled_indices = np.random.permutation(indices)
+
+    # Reorder pixels to original
+    original_pixels = np.empty_like(pixels)
+    original_pixels[shuffled_indices] = pixels
+
+    save_image(original_pixels.reshape((height, width, channels)), output_path)
+
+# Example usage
+if __name__ == "__main__":
+    key = 42  # Example key; use a stronger key for real applications
+    encrypt("input_image.png", "encrypted_image.png", key)
+    decrypt("encrypted_image.png", "decrypted_image.png", key)
